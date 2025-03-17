@@ -22,8 +22,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
 	return (
 		<div className="flex min-h-screen">
-			{/* Sidebar */}
-			<div className="w-64 bg-gray-800 text-white p-4">
+
+			<div className="w-64  text-white p-4">
 				<h2 className="text-xl font-semibold mb-8">داشبورد</h2>
 				<ul>
 					<li className="mb-4 hover:bg-gray-700 p-2 rounded">
@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 				</ul>
 			</div>
 
-			{/* Main Content */}
+
 			<div className="flex-1 ml-64 p-6 overflow-auto">
 				{/* محتویات صفحه */}
 				{children}

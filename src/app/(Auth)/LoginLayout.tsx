@@ -1,3 +1,9 @@
+import { ThemeProvider } from 'next-themes';
+
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
-	return <div className="flex justify-center items-center min-h-screen bg-gray-100">{children}</div>;
+	return (
+		<ThemeProvider attribute="class" defaultTheme="system">
+			<div className="flex">{children}</div>
+		</ThemeProvider>
+	);
 }
