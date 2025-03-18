@@ -21,7 +21,7 @@ export default function Navbar() {
 		<>
 			{isOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-40" onClick={toggleMenu}></div>}
 
-			<nav className="text-[#000] bg-transparent dark:bg-transparent dark:text-white px-4 relative z-50">
+			<nav className="text-[#000] bg-[#f9f9f9] dark:bg-transparent  dark:text-white px-4 relative z-50">
 				<div className="container mx-auto max-w-screen-xl flex justify-between">
 					<div className={` flex justify-center ${isOpen ? 'opacity-0' : 'opacity-100'}`}>
 						<Link href="https://sarodev.ir">

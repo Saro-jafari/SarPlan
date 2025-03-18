@@ -102,8 +102,8 @@ const LoginPage = () => {
 				</div>
 
 				{/* تصویر */}
-				<div className="hidden md:flex ">
-					<Image src="/Picture.svg" height={400} width={400} alt="img" className="max-w-full h-auto" />
+				<div className="hidden md:flex bg-[#f9f9f9] dark:bg-transparent ">
+					<Image src="/Picture.svg" height={400} width={400} alt="img" className="max-w-full h-auto" loading="lazy" />
 				</div>
 			</div>
 		</LoginLayout>
