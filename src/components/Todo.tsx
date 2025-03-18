@@ -2,7 +2,6 @@
 import { useState } from 'react';
 
 const Todo = () => {
-	// State برای وظایف و ورودی‌ها
 	const [tasks, setTasks] = useState({
 		urgentImportant: [],
 		importantNotUrgent: [],
@@ -17,7 +16,7 @@ const Todo = () => {
 		notUrgentNotImportant: '',
 	});
 
-	// تابع برای اضافه کردن وظیفه
+
 	const handleAddTask = category => {
 		if (inputs[category].trim() === '') return;
 

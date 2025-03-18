@@ -38,14 +38,14 @@ const LoginPage = () => {
 
 	return (
 		<LoginLayout>
-			<div className="grid md:grid-cols-2 md:min-h-screen md:w-screen">
+			<div className="grid md:grid-cols-2 md:min-h-screen md:w-screen ">
 				{/* فرم لاگین */}
 				<div className="flex justify-center items-center bg-[#f9f9f9] dark:bg-transparent text-[#262728] ">
-					<div className="w-full max-w-lg p-8 dark:bg-[#135D66] rounded-lg">
-						<h1 className="text-3xl font-bold text-center mb-6">ورود به سیستم</h1>
+					<div className="w-full max-w-lg p-8  rounded-lg">
+						<h1 className="text-3xl font-bold text-center mb-6 dark:text-white">ورود به سیستم</h1>
 						<form onSubmit={handleSubmit} className="space-y-6">
 							<div>
-								<label htmlFor="email" className="block text-sm font-medium text-secondary dark:text-accent py-2">
+								<label htmlFor="email" className="block text-sm font-medium text-secondary dark:text-white py-2">
 									ایمیل
 								</label>
 								<input
@@ -58,7 +58,7 @@ const LoginPage = () => {
 								/>
 							</div>
 							<div>
-								<label htmlFor="password" className="block text-sm font-medium text-secondary dark:text-accent py-2">
+								<label htmlFor="password" className="block text-sm font-medium  dark:text-white py-2">
 									رمز عبور
 								</label>
 								<input
@@ -78,11 +78,11 @@ const LoginPage = () => {
 							</div>
 							<button
 								type="submit"
-								className="w-full py-3  text-white rounded-lg transition duration-300 cursor-pointer bg-[#4461f2] shadow-lg">
+								className="w-full py-3  text-white rounded-lg transition duration-300 cursor-pointer bg-[#4461f2] shadow-lg hover:shadow-xl">
 								{loading ? 'در حال ورود...' : 'ورود'}
 							</button>
 						</form>
-						<p className="my-6 text-sm text-center text-secondary font-semibold dark:text-accent">
+						<p className="my-6 text-sm text-center text-secondary font-semibold dark:text-white">
 							اگر حساب کاربری ندارید، لطفاً با پشتیبانی تماس بگیرید:
 							<br />
 							<span className="block">
@@ -102,7 +102,7 @@ const LoginPage = () => {
 				</div>
 
 				{/* تصویر */}
-				<div className="hidden md:flex">
+				<div className="hidden md:flex ">
 					<Image src="/Picture.svg" height={400} width={400} alt="img" className="max-w-full h-auto" />
 				</div>
 			</div>

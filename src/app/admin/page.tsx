@@ -15,7 +15,6 @@ export default function Users() {
 	const [newUserPassword, setNewUserPassword] = useState<string>('');
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
-	// Fetch users from the database on component mount
 	useEffect(() => {
 		async function fetchUsers() {
 			setIsLoading(true);
@@ -24,10 +23,9 @@ export default function Users() {
 				const data = await response.json();
 
 				if (!response.ok) {
-					// بررسی وضعیت پاسخ و ارور
 					toast.error(data.error || 'خطا در بارگیری لیست کاربران');
 				} else if (data.users) {
-					setUsers(data.users); // فرض بر این است که جواب از بک‌اند به صورت { users: [...] } ارسال می‌شود
+					setUsers(data.users);
 				}
 			} catch (error) {
 				toast.error('خطا در برقراری ارتباط با سرور');
@@ -98,12 +96,11 @@ export default function Users() {
 	};
 
 	return (
-		<div className="flex min-h-screen bg-gray-50">
+		<div className="flex min-h-screen dark:bg-[#677185]">
 			<div className="flex-1 p-6">
-				<h1 className="text-3xl font-bold text-gray-800 mb-6">مدیریت کاربران</h1>
-
+				<h1 className="text-3xl font-bold text-black dark:text-white mb-6">مدیریت کاربران</h1>
 				{/* Form to add a new user */}
-				<div className="mt-6 mb-4 p-6 bg-white rounded-lg shadow-md border border-gray-200">
+				<div className="mt-6 mb-4 p-6 bg-[#939599] rounded-lg shadow-md border border-gray-200">
 					<h2 className="text-xl font-semibold mb-4 text-gray-700 ">ثبت‌نام کاربر جدید</h2>
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 						<div className="mb-4">

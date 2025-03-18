@@ -1,5 +1,11 @@
+import SidebarWithGroups from './sideBar';
+
 const UserPage = () => {
-	return <div>wellcome</div>;
+	return (
+		<div>
+			<SidebarWithGroups />
+		</div>
+	);
 };
 
 export default UserPage;
