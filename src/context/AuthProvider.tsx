@@ -1,24 +1,21 @@
 'use client';
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { getUserFromToken, logoutAction } from '@/lib/serverActions';
+import { useRouter } from 'next/navigation';
 
-// تعریف نوع اطلاعات کاربر
 interface User {
 	email: string;
 	role: string;
 }
 
-// تعریف نوع داده‌ای که در Context ذخیره می‌شود
 interface AuthContextType {
 	user: User | null;
-	login: (user: User) => void;
+	loading: boolean; // وضعیت بارگذاری اضافه شد
 	logout: () => void;
 }
 
-// ایجاد Context برای وضعیت لاگین
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// استفاده از Context برای ارائه اطلاعات
 export const useAuth = () => {
 	const context = useContext(AuthContext);
 	if (!context) {
@@ -27,29 +24,26 @@ export const useAuth = () => {
 	return context;
 };
 
-// فراهم کردن Context برای اپلیکیشن
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
+	const [loading, setLoading] = useState(true); // بارگذاری اولیه
+	const router = useRouter();
 
 	useEffect(() => {
-		// تلاش برای دریافت اطلاعات کاربر از کوکی‌ها
-		const userData = Cookies.get('user');
-		if (userData) {
-			setUser(JSON.parse(userData));
-		}
+		const fetchUser = async () => {
+			const userData = await getUserFromToken();
+			setUser(userData);
+			setLoading(false); // پس از بارگذاری، بارگذاری تمام شده است
+		};
+
+		fetchUser();
 	}, []);
 
-	const login = (user: User) => {
-		setUser(user);
-	
-		Cookies.set('user', JSON.stringify(user), { expires: 1, secure: true, sameSite: 'Strict' });
-	};
-
-	const logout = () => {
+	const logout = async () => {
+		await logoutAction();
 		setUser(null);
-		// حذف کوکی
-		Cookies.remove('user');
+		router.push('/login'); // به صفحه لاگین هدایت می‌شود
 	};
 
-	return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+	return <AuthContext.Provider value={{ user, loading, logout }}>{children}</AuthContext.Provider>;
 };

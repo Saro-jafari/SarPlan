@@ -1,6 +1,6 @@
 'use client';
-import { useAuth } from '@/context/AuthProvider'; // دسترسی به اطلاعات وضعیت ورود کاربر
-import Todo from '@/components/Todo'; // کامپوننت Todo
+import { useAuth } from '@/context/AuthProvider';
+import Todo from '@/components/Todo'; 
 import { redirect } from 'next/navigation';
 
 const Home = () => {

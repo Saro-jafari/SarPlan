@@ -10,11 +10,7 @@ const SideBarAdmin = () => {
 		toast('رسید وقت خداحافظی', {
 			icon: '👋😊',
 		});
-
-		// حذف توکن از کوکی‌ها
 		Cookies.remove('token');
-
-		// هدایت به صفحه ورود
 		redirect('/login');
 	};
 

@@ -5,7 +5,12 @@
 	font-family: 'vazir';
 	src: url('/Vazir.woff2') format('woff2'), url('/Vazir.woff') format('woff'), url('/Vazir.ttf') format('truetype');
 }
+
 body {
-	font-family: 'vazir';
-	font-size: 16px;
+	font-family: 'vazir', sans-serif;
+	direction: rtl;
+}
+
+html {
+	scroll-behavior: smooth;
 }
