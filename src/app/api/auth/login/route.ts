@@ -23,22 +23,31 @@ export async function POST(req: Request) {
 		if (!match) {
 			return new Response(JSON.stringify({ error: 'ایمیل یا رمز عبور اشتباه است.' }), { status: 401 });
 		}
-
-		// تولید توکن JWT با اطلاعات کاربر
 		const token = jwt.sign(
 			{ email: user.email, role: user.role, id: user.id },
 			JWT_SECRET,
-			{ expiresIn: '7d' }, // اعتبار توکن یک هفته
+			{ expiresIn: '1d' }, // اعتبار توکن ۲۴ ساعت
 		);
 
 		const cookie = `token=${token}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Strict; ${
 			process.env.NODE_ENV === 'production' ? 'Secure;' : ''
 		}`;
 
+		// تعریف اطلاعات اضافی برای هر نوع کاربر
+		let additionalData = {};
+		if (user.role === 'admin') {
+			additionalData = { message: 'شما مدیر سیستم هستید', adminDashboardData: 'اطلاعات مربوط به مدیر' };
+		} else if (user.role === 'owner') {
+			additionalData = { message: 'شما مالک سیستم هستید', ownerDashboardData: 'اطلاعات مربوط به مالک' };
+		} else {
+			additionalData = { message: 'شما یک کاربر عادی هستید' };
+		}
+
 		return new Response(
 			JSON.stringify({
 				message: 'ورود موفقیت‌آمیز!',
 				user: { email: user.email, role: user.role },
+				...additionalData, // افزودن اطلاعات اضافی بسته به نقش
 			}),
 			{
 				status: 200,

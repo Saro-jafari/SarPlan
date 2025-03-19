@@ -3,7 +3,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import { redirect } from 'next/navigation';
-import Users from '@/app/dashboard/page';
+import Users from '@/app/admin/page';
 
 const SideBarAdmin = () => {
 	const handleLogout = () => {

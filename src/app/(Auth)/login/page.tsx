@@ -1,5 +1,4 @@
 'use client';
-import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -18,21 +17,27 @@ const LoginPage = () => {
 		setLoading(true);
 		const toastId = toast.loading('در حال ورود...');
 
-		const res = await signIn('credentials', {
-			redirect: false,
-			email,
-			password,
-			rememberMe,
-		});
+		try {
+			const res = await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, password }),
+			});
 
-		setLoading(false);
-		toast.dismiss(toastId);
+			const data = await res.json();
+			if (!res.ok) {
+				toast.error(data.error);
+				return;
+			}
 
-		if (res?.error) {
-			toast.error(res.error);
-		} else {
-			toast.success('ورود موفقیت‌آمیز بود!');
+			toast.success(data.message);
 			router.push('/dashboard');
+		} catch (error) {
+			console.error('Error during login:', error);
+			toast.error(error.message);
+		} finally {
+			setLoading(false);
+			toast.dismiss(toastId);
 		}
 	};
 
@@ -41,7 +46,7 @@ const LoginPage = () => {
 			<div className="grid md:grid-cols-2 md:min-h-screen md:w-screen ">
 				{/* فرم لاگین */}
 				<div className="flex justify-center items-center bg-[#f9f9f9] dark:bg-transparent text-[#262728] ">
-					<div className="w-full max-w-lg p-8  rounded-lg">
+					<div className="w-full max-w-lg p-8 rounded-lg">
 						<h1 className="text-3xl font-bold text-center mb-6 dark:text-white">ورود به سیستم</h1>
 						<form onSubmit={handleSubmit} className="space-y-6">
 							<div>
@@ -54,11 +59,11 @@ const LoginPage = () => {
 									value={email}
 									onChange={e => setEmail(e.target.value)}
 									required
-									className="w-full px-4 py-3 rounded-lg text-[#4F555A] bg-[#EAF0F7]  border-white border-3 focus:border-[#4461F2] focus:outline-none "
+									className="w-full px-4 py-3 rounded-lg text-[#4F555A] bg-[#EAF0F7] border-white border-3 focus:border-[#4461F2] focus:outline-none"
 								/>
 							</div>
 							<div>
-								<label htmlFor="password" className="block text-sm font-medium  dark:text-white py-2">
+								<label htmlFor="password" className="block text-sm font-medium dark:text-white py-2">
 									رمز عبور
 								</label>
 								<input
@@ -67,7 +72,7 @@ const LoginPage = () => {
 									value={password}
 									onChange={e => setPassword(e.target.value)}
 									required
-									className="w-full px-4 py-3 rounded-lg text-[#4F555A] bg-[#EAF0F7]  border-white border-3 focus:border-[#4461F2] focus:outline-none"
+									className="w-full px-4 py-3 rounded-lg text-[#4F555A] bg-[#EAF0F7] border-white border-3 focus:border-[#4461F2] focus:outline-none"
 								/>
 							</div>
 							<div className="flex items-center">
@@ -78,7 +83,7 @@ const LoginPage = () => {
 							</div>
 							<button
 								type="submit"
-								className="w-full py-3  text-white rounded-lg transition duration-300 cursor-pointer bg-[#4461f2] shadow-lg hover:shadow-xl">
+								className="w-full py-3 text-white rounded-lg transition duration-300 cursor-pointer bg-[#4461f2] shadow-lg hover:shadow-xl">
 								{loading ? 'در حال ورود...' : 'ورود'}
 							</button>
 						</form>
@@ -101,8 +106,8 @@ const LoginPage = () => {
 					</div>
 				</div>
 
-				{/* تصویر */}
-				<div className="hidden md:flex bg-[#f9f9f9] dark:bg-transparent ">
+				{/* بخش تصویر */}
+				<div className="hidden md:flex bg-[#f9f9f9] dark:bg-transparent">
 					<Image src="/Picture.svg" height={400} width={400} alt="img" className="max-w-full h-auto" loading="lazy" />
 				</div>
 			</div>

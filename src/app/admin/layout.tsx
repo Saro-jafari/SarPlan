@@ -1,5 +1,6 @@
 'use client';
 import SideBarAdmin from '@/components/SideBarAdmin';
+import { AuthProvider } from '@/context/AuthProvider';
 import '@/globals.css';
 
 import { ThemeProvider } from 'next-themes';
@@ -13,11 +14,13 @@ export default function DashboardLayout() {
 				<title>سارپلن</title>
 			</head>
 			<body className="bg-white dark:bg-[#14162E] text-black dark:text-white">
-				<ThemeProvider attribute="class">
-					<div className="flex-1  overflow-auto">
-						<SideBarAdmin />
-					</div>
-				</ThemeProvider>
+				<AuthProvider>
+					<ThemeProvider attribute="class">
+						<div className="flex-1  overflow-auto">
+							<SideBarAdmin />
+						</div>
+					</ThemeProvider>
+				</AuthProvider>
 			</body>
 		</html>
 	);

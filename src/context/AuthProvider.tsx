@@ -41,8 +41,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 	const login = (user: User) => {
 		setUser(user);
-		// ذخیره اطلاعات کاربر در کوکی به مدت 7 روز (می‌توانید زمان را تغییر دهید)
-		Cookies.set('user', JSON.stringify(user), { expires: 7, secure: true, sameSite: 'Strict' });
+	
+		Cookies.set('user', JSON.stringify(user), { expires: 1, secure: true, sameSite: 'Strict' });
 	};
 
 	const logout = () => {
