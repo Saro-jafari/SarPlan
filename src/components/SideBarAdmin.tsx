@@ -21,7 +21,7 @@ const SideBarAdmin = () => {
 				<h2 className="text-xl font-semibold mb-8">داشبورد</h2>
 				<ul>
 					<li className="mb-4 hover:bg-gray-700 p-2 rounded">
-						<Link href="/dashboard">مدیریت کاربران</Link>
+						<Link href="/admin">مدیریت کاربران</Link>
 					</li>
 					<li className="mb-4 hover:bg-gray-700 p-2 rounded">
 						<Link href="/user-dashboard">رفتن به برنامه</Link>

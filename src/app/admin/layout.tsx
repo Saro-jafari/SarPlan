@@ -1,35 +1,28 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { parseCookies } from 'nookies';
-import jwt from 'jsonwebtoken';
 import SideBarAdmin from '@/components/SideBarAdmin';
 import { AuthProvider } from '@/context/AuthProvider';
+import { getUserFromToken } from '@/lib/serverActions';
 import { ThemeProvider } from 'next-themes';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
+	const [user, setUser] = useState<any>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const cookies = parseCookies();
-		const token = cookies.token;
-
-		if (!token) {
-			router.replace('/access-denied');
-			return;
-		}
-
-		try {
-			const decoded: any = jwt.decode(token);
-			if (!decoded || !decoded.role || (decoded.role !== 'admin' && decoded.role !== 'owner')) {
+		async function fetchUser() {
+			const userData = await getUserFromToken();
+			if (!userData || (userData.role !== 'admin' && userData.role !== 'owner')) {
 				router.replace('/access-denied');
-				return;
+			} else {
+				setUser(userData);
 			}
 			setIsLoading(false);
-		} catch (error) {
-			router.replace('/access-denied');
 		}
+		fetchUser();
 	}, [router]);
 
 	if (isLoading) {
