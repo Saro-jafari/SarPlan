@@ -6,6 +6,7 @@ import SideBarAdmin from '@/components/SideBarAdmin';
 import { AuthProvider } from '@/context/AuthProvider';
 import { getUserFromToken } from '@/lib/serverActions';
 import { ThemeProvider } from 'next-themes';
+import { Toaster } from 'react-hot-toast';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
@@ -31,11 +32,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
 	return (
 		<div className="bg-white dark:bg-[#14162E] text-black dark:text-white">
+			<Toaster />
 			<AuthProvider>
 				<ThemeProvider attribute="class">
 					<div className="flex-1 overflow-auto">
 						<SideBarAdmin />
-						{children}
 					</div>
 				</ThemeProvider>
 			</AuthProvider>

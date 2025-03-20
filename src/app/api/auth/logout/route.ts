@@ -1,6 +1,6 @@
 export async function POST(req: Request) {
 	try {
-		// حذف کوکی توکن JWT با نام `token`
+
 		const cookie = `token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict; ${process.env.NODE_ENV === 'production' ? 'Secure;' : ''}`;
 
 		return new Response(

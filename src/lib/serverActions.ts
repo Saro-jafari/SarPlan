@@ -40,3 +40,13 @@ export async function logoutAction() {
 	const cookieStore = await cookies();
 	cookieStore.delete('token');
 }
+export async function getCookie() {
+	const cookieStore = await cookies();
+	const tokenCookie = cookieStore.get('token');
+	console.log(tokenCookie,"token");
+	if (!tokenCookie) {
+		return null;
+	}
+
+	return tokenCookie.value;
+}

@@ -1,77 +1,112 @@
 import { supabase } from '@/utils/supabase';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-
-const JWT_SECRET = process.env.JWT_SECRET;
+import jwt from 'jsonwebtoken';
 
 export async function POST(req: Request) {
 	try {
+		// دریافت توکن از هدر Authorization
+		const authHeader = req.headers.get('Authorization');
+		if (!authHeader) {
+			return new Response(JSON.stringify({ error: 'توکن احراز هویت باید ارسال شود.' }), { status: 400 });
+		}
+		const token = authHeader.split(' ')[1];
+
+		let decodedToken;
+		try {
+			decodedToken = jwt.verify(token, process.env.JWT_SECRET!);
+		} catch (error) {
+			return new Response(JSON.stringify({ error: 'توکن معتبر نیست.' }), { status: 401 });
+		}
+
+		// دریافت اطلاعات کاربر از جدول users
+		const { data: userData, error: userFetchError } = await supabase.from('users').select('role_id').eq('id', decodedToken.id).single();
+
+		if (userFetchError || !userData) {
+			return new Response(JSON.stringify({ error: 'کاربر یافت نشد.' }), { status: 404 });
+		}
+
+		// دریافت نام نقش کاربر از جدول roles
+		const { data: roleData, error: roleFetchError } = await supabase.from('roles').select('name').eq('id', userData.role_id).single();
+
+		if (roleFetchError || !roleData) {
+			return new Response(JSON.stringify({ error: 'نقش کاربر یافت نشد.' }), { status: 404 });
+		}
+
+		const userRole = roleData.name;
+
+		// فقط مدیر یا مالک می‌توانند کاربران جدید را ثبت کنند
+		if (userRole !== 'admin' && userRole !== 'owner') {
+			return new Response(JSON.stringify({ error: 'شما اجازه ثبت‌نام کاربر جدید را ندارید.' }), { status: 403 });
+		}
+
+		// دریافت داده‌ها از بدن درخواست
 		const { email, password, role } = await req.json();
 
+		// بررسی کامل فیلدهای وارد شده
 		if (!email || !password || !role) {
 			return new Response(JSON.stringify({ error: 'ایمیل، رمز عبور و نقش باید وارد شوند.' }), { status: 400 });
 		}
 
 		// بررسی وجود نقش در جدول roles
-		const { data: roleData, error: roleError } = await supabase.from('roles').select('id').eq('name', role).single();
-
-		if (roleError || !roleData) {
+		const { data: roleInfo, error: roleError } = await supabase.from('roles').select('id').eq('name', role).single();
+		if (roleError || !roleInfo) {
 			return new Response(JSON.stringify({ error: 'نقش نامعتبر است.' }), { status: 400 });
 		}
 
-		const roleId = roleData.id;
+		const roleId = roleInfo.id;
 
-		// بررسی وجود کاربر با ایمیل مشابه
-		const { data: existingUser, error: userError } = await supabase.from('users').select('*').eq('email', email).single();
-		if (userError) {
-			return new Response(JSON.stringify({ error: 'خطا در دریافت اطلاعات کاربر.' }), { status: 500 });
-		}
+		// بررسی وجود کاربر با این ایمیل
+		const { data: existingUser, error: existingUserError } = await supabase.from('users').select('id').eq('email', email).single();
 
 		if (existingUser) {
-			return new Response(JSON.stringify({ error: 'کاربر با این ایمیل قبلاً ثبت‌نام کرده است.' }), { status: 400 });
+			return new Response(JSON.stringify({ error: 'کاربری با این ایمیل قبلاً ثبت شده است.' }), { status: 400 });
+		}
+
+		if (existingUserError && existingUserError.code !== 'PGRST116') {
+			return new Response(JSON.stringify({ error: 'خطا در بررسی کاربر.' }), { status: 500 });
 		}
 
 		// هش کردن رمز عبور
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		// ذخیره کاربر جدید در پایگاه داده با role_id
+		// ثبت کاربر جدید
 		const { data: newUser, error: insertError } = await supabase
 			.from('users')
 			.insert([
 				{
 					email,
 					password: hashedPassword,
-					role_id: roleId, // استفاده از role_id به جای role
-					is_verified: false, // ایمیل تایید نشده است
+					role_id: roleId,
+					is_verified: false,
 				},
 			])
+			.select()
 			.single();
 
 		if (insertError) {
-			return new Response(JSON.stringify({ error: 'خطا در ثبت‌نام کاربر.' }), { status: 500 });
+			console.error('خطا در درج کاربر:', insertError);
+			return new Response(JSON.stringify({ error: 'خطا در ثبت‌نام کاربر.', details: insertError.message }), { status: 500 });
 		}
 
-		// تولید توکن تایید ایمیل
-		const verificationToken = jwt.sign({ email: newUser.email, id: newUser.id }, JWT_SECRET, { expiresIn: '1d' });
-
-		// ارسال ایمیل تایید
-		await sendVerificationEmail(newUser.email, verificationToken);
+		// ارسال ایمیل به کاربر با اطلاعات ورود
+		await sendUserCredentials(email, password);
 
 		return new Response(
 			JSON.stringify({
-				message: 'ثبت‌نام موفقیت‌آمیز! لطفاً ایمیل خود را تایید کنید.',
-				user: { email: newUser.email, role: role }, // می‌توانید نقش را به صورت متنی برگردانید
+				message: 'کاربر با موفقیت ثبت شد. اطلاعات ورود به ایمیل او ارسال شد.',
+				user: { email: newUser.email, role },
 			}),
 			{ status: 200 },
 		);
 	} catch (err) {
-		console.error('Error during registration:', err);
+	
 		return new Response(JSON.stringify({ error: 'مشکلی در پردازش درخواست پیش آمده است.' }), { status: 500 });
 	}
 }
 
-async function sendVerificationEmail(email: string, token: string) {
+// تابع ارسال ایمیل به کاربر
+async function sendUserCredentials(email: string, password: string) {
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -80,13 +115,11 @@ async function sendVerificationEmail(email: string, token: string) {
 		},
 	});
 
-	const verificationUrl = `http://localhost:3000/api/verify-email?token=${token}`;
-
 	const mailOptions = {
 		from: process.env.EMAIL_USER,
 		to: email,
-		subject: 'تایید ایمیل برای ثبت‌نام',
-		text: `برای تایید ثبت‌نام خود، لطفاً بر روی لینک زیر کلیک کنید: ${verificationUrl}`,
+		subject: 'حساب کاربری شما ایجاد شد',
+		text: `مدیر برای شما یک حساب کاربری ایجاد کرده است.\n\nایمیل: ${email}\nرمز عبور: ${password}\n\nلطفاً پس از ورود، رمز عبور خود را تغییر دهید.`,
 	};
 
 	await transporter.sendMail(mailOptions);
