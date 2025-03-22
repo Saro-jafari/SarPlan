@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { getCookie } from '@/lib/serverActions';
 import { deleteUser } from '@/services/userService';
+import UsersTable from '@/components/UsersTable';
 
 interface User {
 	id: string;
@@ -36,6 +37,7 @@ export default function Users() {
 						toast.error(data.error || 'خطا در بارگیری لیست کاربران');
 					} else if (data.users) {
 						setUsers(data.users);
+						toast.success('اطلاعات کاربران با موفقیت بارگذاری شد.');
 					}
 				} catch (error) {
 					toast.error('خطا در برقراری ارتباط با سرور');
@@ -45,22 +47,6 @@ export default function Users() {
 			fetchUsers();
 		}
 	}, [user, loading, router]);
-
-	const handleDelete = async (userId: string) => {
-		const loadingDelete = toast.loading('در حال حذف کاربر...');
-		try {
-			const data = await deleteUser(userId);
-			if (data && data.message && data.message === 'کاربر با موفقیت حذف شد') {
-				setUsers(prev => prev.filter(user => user.id !== userId));
-				toast.success(data.message);
-			} else {
-				toast.error('خطا در حذف کاربر');
-			}
-		} catch (error) {
-			toast.error('خطا در ارسال درخواست');
-		}
-		toast.dismiss(loadingDelete);
-	};
 
 	const handleCreateUser = async () => {
 		if (!newUserEmail || !newUserPassword || !newUserRole) {
@@ -115,7 +101,7 @@ export default function Users() {
 
 		const loadingRecovery = toast.loading('در حال ارسال درخواست بازیابی رمز...');
 		try {
-			const response = await fetch('/api/auth/recover', {
+			const response = await fetch('/api/resetPassword/request', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -135,6 +121,43 @@ export default function Users() {
 		}
 	};
 
+	// Handle deleting a user
+	const handleDelete = async (id: string) => {
+		const loadingDelete = toast.loading('در حال حذف کاربر...');
+		try {
+			const response = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+			if (response.ok) {
+				setUsers(prev => prev.filter(user => user.id !== id));
+				toast.success('کاربر با موفقیت حذف شد.');
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'خطا در حذف کاربر');
+			}
+		} catch (error) {
+			toast.error('خطا در حذف کاربر');
+		} finally {
+			toast.dismiss(loadingDelete);
+		}
+	};
+
+	const handleToggleActive = async (id, newStatus) => {
+		try {
+			const res = await fetch(`/api/users/${id}/status`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ status: newStatus }),
+			});
+
+			if (res.ok) {
+				setUsers(prevUsers => prevUsers.map(user => (user.id === id ? { ...user, status: newStatus } : user)));
+			} else {
+				console.error('Failed to update user status');
+			}
+		} catch (error) {
+			console.error('Error updating status:', error);
+		}
+	};
+
 	return (
 		<>
 			{loading ? (
@@ -143,7 +166,6 @@ export default function Users() {
 				<div className="flex min-h-screen dark:bg-[#677185]">
 					<div className="flex-1 p-6">
 						<h1 className="text-3xl font-bold text-black dark:text-white mb-6">مدیریت کاربران</h1>
-						{/* دو فرم مجزا */}
 						<section className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							{/* فرم ثبت‌نام کاربر جدید */}
 							<div className="mt-6 mb-4 p-6 bg-[#939599] rounded-lg shadow-md border border-gray-200">
@@ -186,14 +208,17 @@ export default function Users() {
 											className="w-full p-3 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
 											<option value="user">کاربر</option>
 											<option value="admin">مدیر</option>
+											<option value="owner">مالک</option>
 										</select>
 									</div>
+									<div className="mb-4 col-span-2">
+										<button
+											onClick={handleCreateUser}
+											className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+											ثبت‌نام
+										</button>
+									</div>
 								</div>
-								<button
-									onClick={handleCreateUser}
-									className="mt-6 px-6 py-3 w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-200 cursor-pointer">
-									ثبت
-								</button>
 							</div>
 
 							{/* فرم بازیابی رمز عبور */}
@@ -209,44 +234,21 @@ export default function Users() {
 										value={recoveryEmail}
 										onChange={e => setRecoveryEmail(e.target.value)}
 										className="w-full p-3 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-										placeholder="ایمیل خود را وارد کنید"
+										placeholder="ایمیل برای بازیابی رمز عبور"
 									/>
 								</div>
-								<button
-									onClick={handlePasswordRecovery}
-									className="mt-6 px-6 py-3 w-full bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-200 cursor-pointer">
-									بازیابی رمز عبور
-								</button>
+								<div className="mb-4">
+									<button
+										onClick={handlePasswordRecovery}
+										className="w-full py-3 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+										بازیابی رمز عبور
+									</button>
+								</div>
 							</div>
-						</section>
 
-						{/* جدول کاربران */}
-						<div className="overflow-x-auto mt-6">
-							<table className="min-w-full table-auto border-separate border-spacing-0 border border-gray-300">
-								<thead className="bg-blue-50">
-									<tr>
-										<th className="p-4 text-right text-sm font-medium text-gray-600">ایمیل</th>
-										<th className="p-4 text-right text-sm font-medium text-gray-600">نقش</th>
-										<th className="p-4 text-right text-sm font-medium text-gray-600">عملیات</th>
-									</tr>
-								</thead>
-								<tbody>
-									{users.map(user => (
-										<tr key={user.id} className="hover:bg-blue-50">
-											<td className="p-4 text-sm text-gray-700 border-t border-gray-200">{user.email}</td>
-											<td className="p-4 text-sm text-gray-700 border-t border-gray-200">{user.role}</td>
-											<td className="p-4 text-sm text-gray-700 border-t border-gray-200">
-												<button
-													className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 transition cursor-pointer"
-													onClick={() => handleDelete(user.id)}>
-													حذف
-												</button>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
+							{/* لیست کاربران */}
+							<UsersTable data={users} handleDelete={handleDelete} handleToggleActive={handleToggleActive} />
+						</section>
 					</div>
 				</div>
 			)}

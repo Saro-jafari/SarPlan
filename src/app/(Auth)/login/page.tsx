@@ -29,15 +29,23 @@ const LoginPage = () => {
 				toast.error(data.error);
 				return;
 			}
-			console.log('Navigating to /admin');
 
-			router.push('/admin');
+			// بررسی نقش کاربر
+			const userRole = data?.user?.role;
+			console.log('User Role:', userRole); // بررسی نقش کاربر در کنسول
 
-			// 🔹 بعد نمایش پیام موفقیت
+			if (userRole === 'admin') {
+				router.push('/admin'); // هدایت به صفحه ادمین
+			} else if (userRole === 'user') {
+				router.push('/user-dashboard'); // هدایت به صفحه یوزر
+			} else {
+				toast.error('نقش نامشخص!');
+			}
+
 			toast.success(data.message);
 		} catch (error) {
 			console.error('Error during login:', error);
-			toast.error(error.message);
+			toast.error('خطا در ورود');
 		} finally {
 			setLoading(false);
 			toast.dismiss(toastId);
