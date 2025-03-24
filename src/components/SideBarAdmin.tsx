@@ -16,7 +16,7 @@ const SideBarAdmin: FC = () => {
 			const res = await fetch('/api/auth/logout', { method: 'POST' });
 
 			if (res.ok) {
-				router.push('/login'); // تغییر از redirect به router.push
+				router.push('/login');
 			} else {
 				toast.error('مشکلی پیش آمده است. دوباره تلاش کنید.');
 			}
@@ -61,7 +61,7 @@ const SideBarAdmin: FC = () => {
 						<Link href="/dashboard/reports">گزارشات</Link>
 					</li>
 					{/* دکمه خروج */}
-					<li className="mb-4 hover:bg-gray-700 p-2 rounded cursor-pointer" onClick={() => handleLogout} aria-label="Logout">
+					<li className="mb-4 hover:bg-gray-700 p-2 rounded cursor-pointer" onClick={handleLogout} aria-label="Logout">
 						خروج
 					</li>
 				</ul>

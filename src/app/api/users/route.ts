@@ -4,6 +4,7 @@ import { supabase } from '@/utils/supabase';
 export async function GET() {
 	try {
 		const { data, error } = await supabase.from('users').select('*');
+		console.log(data, 'data');
 		if (error) {
 			console.error('Supabase Error:', error); // چاپ جزئیات خطا
 			return NextResponse.json({ message: 'خطا در گرفتن اطلاعات کاربران' }, { status: 500 });

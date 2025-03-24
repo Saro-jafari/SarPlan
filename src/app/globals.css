@@ -20,3 +20,27 @@ text {
 	font-size: 16px;
 	font-weight: '500';
 }
+.dark .ag-theme-alpine {
+	--ag-background-color: #1f2937; /* پس‌زمینه کل جدول */
+	--ag-header-background-color: #374151; /* پس‌زمینه هدر */
+	--ag-header-foreground-color: #e5e7eb; /* متن هدر */
+	--ag-row-hover-color: #4b5563; /* رنگ هاور ردیف‌ها */
+	--ag-foreground-color: #f9fafb; /* رنگ متن سلول‌ها */
+	--ag-border-color: #4b5563; /* رنگ بوردار جدول */
+}
+
+/* تغییر رنگ پس‌زمینه سلول‌ها */
+.dark .ag-theme-alpine .ag-cell {
+	background-color: #111827 !important; /* پس‌زمینه سلول‌ها در حالت دارک */
+	color: #f9fafb !important; /* رنگ متن */
+}
+
+/* تغییر رنگ پس‌زمینه هر سطر */
+.dark .ag-theme-alpine .ag-row {
+	background-color: #1f2937 !important; /* رنگ سطرها */
+}
+
+/* تغییر رنگ پس‌زمینه هاور روی ردیف */
+.dark .ag-theme-alpine .ag-row-hover {
+	background-color: #374151 !important;
+}

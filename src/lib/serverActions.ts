@@ -43,7 +43,7 @@ export async function logoutAction() {
 export async function getCookie() {
 	const cookieStore = await cookies();
 	const tokenCookie = cookieStore.get('token');
-	console.log(tokenCookie,"token");
+
 	if (!tokenCookie) {
 		return null;
 	}

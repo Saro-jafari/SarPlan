@@ -14,15 +14,25 @@ export async function POST(req: Request) {
 
 		let decodedToken;
 		try {
+			// بررسی اعتبار توکن
 			decodedToken = jwt.verify(token, process.env.JWT_SECRET!);
+			console.log('توکن معتبر:', decodedToken); // لاگ توکن
 		} catch (error) {
+			console.error('خطا در بررسی توکن:', error);
 			return new Response(JSON.stringify({ error: 'توکن معتبر نیست.' }), { status: 401 });
 		}
 
-		// دریافت اطلاعات کاربر از جدول users
-		const { data: userData, error: userFetchError } = await supabase.from('users').select('role_id').eq('id', decodedToken.id).single();
+		// بررسی اینکه آیا id از توکن استخراج شده است
+		if (!decodedToken || !decodedToken.id) {
+			console.error('tokennn', decodedToken);
+			return new Response(JSON.stringify({ error: 'کاربر یافت نشد.' }), { status: 404 });
+		}
+
+		// دریافت اطلاعات کاربر از پایگاه داده با استفاده از شناسه موجود در توکن
+		const { data: userData, error: userFetchError } = await supabase.from('users').select('*').eq('id', decodedToken.id).single();
 
 		if (userFetchError || !userData) {
+			console.error('خطا در یافتن کاربر:', userFetchError);
 			return new Response(JSON.stringify({ error: 'کاربر یافت نشد.' }), { status: 404 });
 		}
 
@@ -50,6 +60,7 @@ export async function POST(req: Request) {
 
 		// بررسی وجود نقش در جدول roles
 		const { data: roleInfo, error: roleError } = await supabase.from('roles').select('id').eq('name', role).single();
+
 		if (roleError || !roleInfo) {
 			return new Response(JSON.stringify({ error: 'نقش نامعتبر است.' }), { status: 400 });
 		}
@@ -86,7 +97,13 @@ export async function POST(req: Request) {
 
 		if (insertError) {
 			console.error('خطا در درج کاربر:', insertError);
-			return new Response(JSON.stringify({ error: 'خطا در ثبت‌نام کاربر.', details: insertError.message }), { status: 500 });
+			return new Response(
+				JSON.stringify({
+					error: 'خطا در ثبت‌نام کاربر.',
+					details: insertError.message,
+				}),
+				{ status: 500 },
+			);
 		}
 
 		// ارسال ایمیل به کاربر با اطلاعات ورود
@@ -100,7 +117,7 @@ export async function POST(req: Request) {
 			{ status: 200 },
 		);
 	} catch (err) {
-	
+		console.error('خطای سرور:', err);
 		return new Response(JSON.stringify({ error: 'مشکلی در پردازش درخواست پیش آمده است.' }), { status: 500 });
 	}
 }

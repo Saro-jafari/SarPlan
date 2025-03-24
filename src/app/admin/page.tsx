@@ -4,13 +4,14 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { getCookie } from '@/lib/serverActions';
-import { deleteUser } from '@/services/userService';
+
 import UsersTable from '@/components/UsersTable';
 
 interface User {
 	id: string;
 	email: string;
-	role: string;
+	is_verified: boolean;
+	role_id: string;
 }
 
 export default function Users() {
@@ -47,7 +48,7 @@ export default function Users() {
 			fetchUsers();
 		}
 	}, [user, loading, router]);
-
+	console.log(newUserRole, 'role');
 	const handleCreateUser = async () => {
 		if (!newUserEmail || !newUserPassword || !newUserRole) {
 			toast.error('لطفاً تمام فیلدها را پر کنید');
@@ -120,18 +121,19 @@ export default function Users() {
 			toast.dismiss(loadingRecovery);
 		}
 	};
-
-	// Handle deleting a user
 	const handleDelete = async (id: string) => {
 		const loadingDelete = toast.loading('در حال حذف کاربر...');
 		try {
-			const response = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+			const response = await fetch(`/api/users/${id}`, {
+				method: 'DELETE',
+			});
+			console.log(response, 'res');
 			if (response.ok) {
 				setUsers(prev => prev.filter(user => user.id !== id));
 				toast.success('کاربر با موفقیت حذف شد.');
 			} else {
 				const data = await response.json();
-				toast.error(data.error || 'خطا در حذف کاربر');
+				toast.error(data.message || 'خطا در حذف کاربر');
 			}
 		} catch (error) {
 			toast.error('خطا در حذف کاربر');
@@ -140,7 +142,13 @@ export default function Users() {
 		}
 	};
 
-	const handleToggleActive = async (id, newStatus) => {
+	const handleToggleActive = async (id, currentStatus) => {
+		// 🔄 نمایش لودینگ
+		const loadingToast = toast.loading('در حال به‌روزرسانی وضعیت...');
+
+		// معکوس کردن وضعیت (true به false و بالعکس)
+		const newStatus = currentStatus === true ? false : true;
+
 		try {
 			const res = await fetch(`/api/users/${id}/status`, {
 				method: 'POST',
@@ -148,13 +156,21 @@ export default function Users() {
 				body: JSON.stringify({ status: newStatus }),
 			});
 
+			const data = await res.json(); // دریافت پیام از سرور
+
+			// ❌ بستن لودینگ
+			toast.dismiss(loadingToast);
+
 			if (res.ok) {
+				// به‌روزرسانی وضعیت کاربر در لیست
 				setUsers(prevUsers => prevUsers.map(user => (user.id === id ? { ...user, status: newStatus } : user)));
+				toast.success(data.message); // ✅ پیام موفقیت
 			} else {
-				console.error('Failed to update user status');
+				toast.error(data.message); // ❌ پیام خطا از سرور
 			}
 		} catch (error) {
-			console.error('Error updating status:', error);
+			toast.dismiss(loadingToast); // ❌ بستن لودینگ
+			toast.error('خطای شبکه! لطفاً اتصال خود را بررسی کنید'); // 🌐 پیام خطای ارتباطی
 		}
 	};
 
@@ -163,16 +179,16 @@ export default function Users() {
 			{loading ? (
 				<div className="bg-white h-screen">loading</div>
 			) : (
-				<div className="flex min-h-screen dark:bg-[#677185]">
-					<div className="flex-1 p-6">
-						<h1 className="text-3xl font-bold text-black dark:text-white mb-6">مدیریت کاربران</h1>
-						<section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="flex min-h-screen bg-gray-100 dark:bg-gray-800 p-6">
+					<div className="flex-1 p-6 h-full">
+						<h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">مدیریت کاربران</h1>
+						<section className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							{/* فرم ثبت‌نام کاربر جدید */}
-							<div className="mt-6 mb-4 p-6 bg-[#939599] rounded-lg shadow-md border border-gray-200">
-								<h2 className="text-xl font-semibold mb-4 text-gray-700">ثبت‌نام کاربر جدید</h2>
+							<div className="p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-600">
+								<h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">ثبت‌نام کاربر جدید</h2>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-									<div className="mb-4">
-										<label htmlFor="email-new" className="block text-gray-600">
+									<div>
+										<label htmlFor="email-new" className="block text-gray-600 dark:text-gray-300">
 											ایمیل
 										</label>
 										<input
@@ -180,12 +196,12 @@ export default function Users() {
 											type="email"
 											value={newUserEmail}
 											onChange={e => setNewUserEmail(e.target.value)}
-											className="w-full p-3 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+											className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 											placeholder="ایمیل کاربر جدید"
 										/>
 									</div>
-									<div className="mb-4">
-										<label htmlFor="password-new" className="block text-gray-600">
+									<div>
+										<label htmlFor="password-new" className="block text-gray-600 dark:text-gray-300">
 											رمز عبور
 										</label>
 										<input
@@ -193,28 +209,28 @@ export default function Users() {
 											type="password"
 											value={newUserPassword}
 											onChange={e => setNewUserPassword(e.target.value)}
-											className="w-full p-3 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+											className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 											placeholder="رمز عبور کاربر جدید"
 										/>
 									</div>
-									<div className="mb-4">
-										<label htmlFor="role-new" className="block text-gray-600 cursor-pointer">
+									<div>
+										<label htmlFor="role-new" className="block text-gray-600 dark:text-gray-300">
 											نقش
 										</label>
 										<select
 											id="role-new"
 											value={newUserRole}
 											onChange={e => setNewUserRole(e.target.value)}
-											className="w-full p-3 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+											className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
 											<option value="user">کاربر</option>
 											<option value="admin">مدیر</option>
 											<option value="owner">مالک</option>
 										</select>
 									</div>
-									<div className="mb-4 col-span-2">
+									<div className="col-span-2">
 										<button
 											onClick={handleCreateUser}
-											className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+											className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
 											ثبت‌نام
 										</button>
 									</div>
@@ -222,10 +238,10 @@ export default function Users() {
 							</div>
 
 							{/* فرم بازیابی رمز عبور */}
-							<div className="mt-6 mb-4 p-6 bg-[#939599] rounded-lg shadow-md border border-gray-200">
-								<h2 className="text-xl font-semibold mb-4 text-gray-700">بازیابی رمز عبور</h2>
-								<div className="mb-4">
-									<label htmlFor="email-recovery" className="block text-gray-600">
+							<div className="p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-600">
+								<h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">بازیابی رمز عبور</h2>
+								<div>
+									<label htmlFor="email-recovery" className="block text-gray-600 dark:text-gray-300">
 										ایمیل
 									</label>
 									<input
@@ -233,20 +249,22 @@ export default function Users() {
 										type="email"
 										value={recoveryEmail}
 										onChange={e => setRecoveryEmail(e.target.value)}
-										className="w-full p-3 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+										className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 										placeholder="ایمیل برای بازیابی رمز عبور"
 									/>
 								</div>
-								<div className="mb-4">
+								<div className="mt-4">
 									<button
 										onClick={handlePasswordRecovery}
-										className="w-full py-3 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+										className="w-full py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
 										بازیابی رمز عبور
 									</button>
 								</div>
 							</div>
+						</section>
 
-							{/* لیست کاربران */}
+						{/* لیست کاربران */}
+						<section className="mt-6">
 							<UsersTable data={users} handleDelete={handleDelete} handleToggleActive={handleToggleActive} />
 						</section>
 					</div>

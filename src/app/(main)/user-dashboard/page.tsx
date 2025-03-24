@@ -10,7 +10,7 @@ export default function Dashboard() {
 	]);
 
 	return (
-		<div className="flex min-h-screen">
+		<div className="flex min-h-screen ">
 			{/* محتوی اصلی */}
 			<div className="md:flex-1 md:ml-16 md:p-6  mt-10">
 				<header className="flex justify-between items-center mb-4 text-white max-w-7xl mx-auto">
