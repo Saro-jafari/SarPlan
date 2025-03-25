@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 import { Calendar } from 'react-multi-date-picker';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
-import DatePickerHeader from 'react-multi-date-picker/plugins/date_picker_header';
+
 
 export default function PersianCalendar() {
 	const [value, setValue] = useState(new Date());
 
 	return (
-		<div className="w-fit p-4 bg-[#fff] rounded-xl shadow-lg text-white">
+		<div className="w-full max-w-[500px] p-4 bg-[#fff] rounded-xl shadow-lg text-white ">
 			{/* Flexbox برای چینش دکمه‌ها و تقویم */}
 			<div className="flex flex-col md:flex-row gap-6">
 				{/* ستون دکمه‌ها */}
@@ -28,15 +28,14 @@ export default function PersianCalendar() {
 				</div>
 
 				{/* ستون تقویم */}
-				<div>
+				<div className="overflow-hidden max-w-full">
 					<Calendar
-						className="grid grid-cols-1 "
+						className="grid grid-cols-1"
 						calendar={persian}
 						locale={persian_fa}
 						value={value}
 						numberOfMonths={1}
 						onChange={setValue}
-						plugins={[<DatePickerHeader />]}
 					/>
 				</div>
 			</div>

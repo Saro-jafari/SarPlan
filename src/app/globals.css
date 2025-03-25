@@ -9,6 +9,7 @@
 body {
 	font-family: 'vazir', sans-serif;
 	direction: rtl;
+	background: transparent;
 }
 
 html {
@@ -43,4 +44,7 @@ text {
 /* تغییر رنگ پس‌زمینه هاور روی ردیف */
 .dark .ag-theme-alpine .ag-row-hover {
 	background-color: #374151 !important;
+}
+.rmdp-wrapper {
+	width: '100px';
 }

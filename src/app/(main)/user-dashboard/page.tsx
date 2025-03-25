@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import EisenhowerMatrix from '@/components/EisenhowerMatrix';
 import PersianCalendar from '@/components/Calendar';
+
 export default function Dashboard() {
 	const [tasks, setTasks] = useState([
 		{ id: '1', text: 'تسک ۱' },
@@ -10,17 +11,17 @@ export default function Dashboard() {
 	]);
 
 	return (
-		<div className="flex min-h-screen ">
+		<div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
 			{/* محتوی اصلی */}
-			<div className="md:flex-1 md:ml-16 md:p-6  mt-10">
-				<header className="flex justify-between items-center mb-4 text-white max-w-7xl mx-auto">
+			<div className="flex-1 p-4 md:ml-16 md:p-6 mt-10">
+				<header className="flex justify-between items-center mb-4 text-white max-w-7xl mx-auto px-4">
 					<button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">+ تسک جدید</button>
 				</header>
 
-				<section className="grid md:grid-cols-2 max-w-7xl mx-auto gap-x-25 gap-y-8 ">
+				<section className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto px-4">
 					{/* ستون اول: تسک‌ها و تقویم */}
 					<div className="space-y-8">
-						<section className="bg-[#14162E] shadow-md rounded-lg h-fit w-full">
+						<section className="bg-[#14162E] shadow-md rounded-lg p-4">
 							<h2 className="text-lg font-bold text-white mb-4">تسک‌ها</h2>
 							<ul className="space-y-2">
 								{tasks.map(task => (
@@ -34,7 +35,7 @@ export default function Dashboard() {
 						</section>
 
 						{/* تقویم زیر تسک‌ها */}
-						<section className="bg-white shadow-md rounded-lg ">
+						<section className="bg-white shadow-md rounded-lg p-4">
 							<PersianCalendar />
 						</section>
 					</div>

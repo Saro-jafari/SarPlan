@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { getCookie } from '@/lib/serverActions';
-
 import UsersTable from '@/components/UsersTable';
 
 interface User {
@@ -48,7 +47,7 @@ export default function Users() {
 			fetchUsers();
 		}
 	}, [user, loading, router]);
-	console.log(newUserRole, 'role');
+
 	const handleCreateUser = async () => {
 		if (!newUserEmail || !newUserPassword || !newUserRole) {
 			toast.error('لطفاً تمام فیلدها را پر کنید');
@@ -121,13 +120,13 @@ export default function Users() {
 			toast.dismiss(loadingRecovery);
 		}
 	};
+
 	const handleDelete = async (id: string) => {
 		const loadingDelete = toast.loading('در حال حذف کاربر...');
 		try {
 			const response = await fetch(`/api/users/${id}`, {
 				method: 'DELETE',
 			});
-			console.log(response, 'res');
 			if (response.ok) {
 				setUsers(prev => prev.filter(user => user.id !== id));
 				toast.success('کاربر با موفقیت حذف شد.');
@@ -142,12 +141,9 @@ export default function Users() {
 		}
 	};
 
-	const handleToggleActive = async (id, currentStatus) => {
-		// 🔄 نمایش لودینگ
+	const handleToggleActive = async (id: string, currentStatus: boolean) => {
 		const loadingToast = toast.loading('در حال به‌روزرسانی وضعیت...');
-
-		// معکوس کردن وضعیت (true به false و بالعکس)
-		const newStatus = currentStatus === true ? false : true;
+		const newStatus = !currentStatus;
 
 		try {
 			const res = await fetch(`/api/users/${id}/status`, {
@@ -156,35 +152,31 @@ export default function Users() {
 				body: JSON.stringify({ status: newStatus }),
 			});
 
-			const data = await res.json(); // دریافت پیام از سرور
-
-			// ❌ بستن لودینگ
+			const data = await res.json();
 			toast.dismiss(loadingToast);
 
 			if (res.ok) {
-				// به‌روزرسانی وضعیت کاربر در لیست
 				setUsers(prevUsers => prevUsers.map(user => (user.id === id ? { ...user, status: newStatus } : user)));
-				toast.success(data.message); // ✅ پیام موفقیت
+				toast.success(data.message);
 			} else {
-				toast.error(data.message); // ❌ پیام خطا از سرور
+				toast.error(data.message);
 			}
 		} catch (error) {
-			toast.dismiss(loadingToast); // ❌ بستن لودینگ
-			toast.error('خطای شبکه! لطفاً اتصال خود را بررسی کنید'); // 🌐 پیام خطای ارتباطی
+			toast.dismiss(loadingToast);
+			toast.error('خطای شبکه! لطفاً اتصال خود را بررسی کنید');
 		}
 	};
 
 	return (
 		<>
 			{loading ? (
-				<div className="bg-white h-screen">loading</div>
+				<div className="bg-white h-screen flex items-center justify-center">loading</div>
 			) : (
-				<div className="flex min-h-screen bg-gray-100 dark:bg-gray-800 p-6">
-					<div className="flex-1 p-6 h-full">
-						<h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">مدیریت کاربران</h1>
-						<section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div className="bg-gray-100 dark:bg-gray-800 p-4 md:p-6">
+					<div className="max-w-4xl mx-auto bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-600 p-4">
+						<section className="grid grid-cols-1 gap-6">
 							{/* فرم ثبت‌نام کاربر جدید */}
-							<div className="p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-600">
+							<div className="p-4 bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-600">
 								<h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">ثبت‌نام کاربر جدید</h2>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 									<div>
@@ -227,7 +219,7 @@ export default function Users() {
 											<option value="owner">مالک</option>
 										</select>
 									</div>
-									<div className="col-span-2">
+									<div className="col-span-1 sm:col-span-2">
 										<button
 											onClick={handleCreateUser}
 											className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -238,7 +230,7 @@ export default function Users() {
 							</div>
 
 							{/* فرم بازیابی رمز عبور */}
-							<div className="p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-600">
+							<div className="p-4 bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-600">
 								<h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">بازیابی رمز عبور</h2>
 								<div>
 									<label htmlFor="email-recovery" className="block text-gray-600 dark:text-gray-300">
@@ -264,7 +256,7 @@ export default function Users() {
 						</section>
 
 						{/* لیست کاربران */}
-						<section className="mt-6">
+						<section className="">
 							<UsersTable data={users} handleDelete={handleDelete} handleToggleActive={handleToggleActive} />
 						</section>
 					</div>

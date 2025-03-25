@@ -144,7 +144,7 @@ const EditableTreeChart: React.FC = () => {
 
 			{/* نمایش درخت */}
 			<div id="treeWrapper" style={{ width: '100%', height: '500px' }} className="bg-[#14162E]  shadow-lg rounded-lg">
-				<Tree data={treeData} orientation="vertical"  />
+				<Tree data={treeData} orientation="vertical" />
 			</div>
 		</div>
 	);

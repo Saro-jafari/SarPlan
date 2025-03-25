@@ -8,7 +8,8 @@ import { FaCheck, FaTimes } from 'react-icons/fa';
 export default function UsersTable({ data, handleDelete, handleToggleActive }) {
 	const { theme } = useTheme();
 	const isDarkMode = theme === 'dark';
-	function getRoleFromUserId(roleId: string) {
+
+	function getRoleFromUserId(roleId) {
 		const roles = {
 			'29e847a2-1dd9-4ff5-bd4d-a59a6a9e1976': 'admin',
 			'082c89e2-19b8-4e37-bbd2-eb4eabe7667f': 'user',
@@ -18,20 +19,12 @@ export default function UsersTable({ data, handleDelete, handleToggleActive }) {
 	}
 
 	const columnDefs = [
-		{
-			field: 'email',
-			headerName: 'ایمیل',
-			flex: 1,
-			cellClass: isDarkMode ? 'text-gray-200' : 'text-gray-800',
-		},
+		{ field: 'email', headerName: 'ایمیل', flex: 1, minWidth: 180 },
 		{
 			field: 'role',
 			headerName: 'نقش',
-			with: 140,
-			cellRenderer: params => {
-				const roleName = getRoleFromUserId(params.data.role_id);
-				return <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{roleName}</span>;
-			},
+			width: 140,
+			cellRenderer: params => getRoleFromUserId(params.data.role_id),
 		},
 		{
 			field: 'is_verified',
@@ -45,18 +38,15 @@ export default function UsersTable({ data, handleDelete, handleToggleActive }) {
 		{
 			field: 'status',
 			headerName: 'وضعیت',
-			cellRenderer: params => {
-				const { status, id } = params.data;
-				return (
-					<button
-						className={`px-4 py-2 text-sm font-semibold rounded-md transition shadow-md
-                        ${status ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'} text-white`}
-						onClick={() => handleToggleActive(id, status)}>
-						{status ? 'فعال' : 'غیرفعال'}
-					</button>
-				);
-			},
-			width: 140,
+			cellRenderer: params => (
+				<button
+					className={`px-2 py-1 text-xs font-semibold rounded-md transition shadow-md
+                        ${params.data.status ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'} text-white`}
+					onClick={() => handleToggleActive(params.data.id, params.data.status)}>
+					{params.data.status ? 'فعال' : 'غیرفعال'}
+				</button>
+			),
+			width: 120,
 			cellClass: 'text-center',
 		},
 		{
@@ -64,28 +54,32 @@ export default function UsersTable({ data, handleDelete, handleToggleActive }) {
 			headerName: 'عملیات',
 			cellRenderer: params => (
 				<button
-					className="px-4 py-2 text-sm font-semibold bg-red-500 hover:bg-red-600 text-white rounded-md transition shadow-md"
+					className="px-2 py-1 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded-md transition shadow-md"
 					onClick={() => handleDelete(params.data.id)}>
 					حذف
 				</button>
 			),
-			width: 120,
+			width: 100,
 			cellClass: 'text-center',
 		},
 	];
 
 	return (
-		<div
-			className={`ag-theme-alpine ${isDarkMode ? 'ag-theme-alpine-dark' : ''} mt-6 shadow-xl rounded-lg p-4 bg-white dark:bg-gray-800`}
-			style={{ width: '100%', height: '600px' }}>
-			<AgGridReact
-				rowData={data}
-				columnDefs={columnDefs}
-				domLayout="autoHeight"
-				pagination={true}
-				paginationPageSize={12}
-				modules={[ClientSideRowModelModule]}
-			/>
+		<div className="w-full overflow-auto">
+			<div
+				className={`ag-theme-alpine ${isDarkMode ? 'ag-theme-alpine-dark' : ''} mt-4 shadow-xl rounded-lg p-2 min-w-[600px]`}
+				style={{ height: '500px' }}>
+				<AgGridReact
+					rowData={data}
+					columnDefs={columnDefs}
+					domLayout="autoHeight"
+					pagination={true}
+					paginationPageSize={10}
+					modules={[ClientSideRowModelModule]}
+					suppressHorizontalScroll={false}
+					suppressCellFocus={true}
+				/>
+			</div>
 		</div>
 	);
 }
