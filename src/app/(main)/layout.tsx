@@ -81,7 +81,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 							<nav className="flex-1">
 								<ul className="space-y-4">
 									<p className="text-xl font-bold p-2">سارپلن</p>
-									<li className="p-2 rounded hover:bg-gray-700 cursor-pointer">کارهایی که باید انجام بدم</li>
+									<li className="p-2 rounded hover:bg-gray-700 cursor-pointer">
+										<Link href="/user-dashboard/tasks">کارهایی که باید انجام بدم </Link>
+									</li>
 									<li className="p-2 rounded hover:bg-gray-700 cursor-pointer">
 										<Link href="/user-dashboard/categories">دسته بندی کارهای من</Link>
 									</li>

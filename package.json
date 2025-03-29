@@ -13,6 +13,7 @@
 		"@ag-grid-community/core": "^32.3.4",
 		"@ag-grid-community/react": "^32.3.4",
 		"@ag-grid-community/styles": "^32.3.4",
+		"@dnd-kit/sortable": "^10.0.0",
 		"@hassanmojab/react-modern-calendar-datepicker": "^3.1.7",
 		"@supabase/supabase-js": "^2.49.1",
 		"@tailwindcss/vite": "^4.0.14",

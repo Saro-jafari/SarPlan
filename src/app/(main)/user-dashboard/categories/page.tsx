@@ -289,16 +289,16 @@ const CategoryManager = () => {
 					/>
 				))}
 			</div>
-			{/* مودال افزودن دسته‌بندی اصلی */}
+
 			<CategoryModal isOpen={mainModalOpen} onClose={() => setMainModalOpen(false)} onSave={addCategory} title="ایجاد دسته‌بندی اصلی" />
-			{/* مودال افزودن زیر دسته */}
+
 			<CategoryModal
 				isOpen={subModalOpen}
 				onClose={() => setSubModalOpen(false)}
 				onSave={newSubCategory => addSubCategory(parentCategoryId, newSubCategory)}
 				title="ایجاد زیر دسته"
 			/>
-			{/* مودال ویرایش دسته‌بندی */}
+
 			<CategoryModal
 				isOpen={editModalOpen}
 				onClose={() => setEditModalOpen(false)}
