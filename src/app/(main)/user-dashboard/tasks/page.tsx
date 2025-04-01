@@ -4,7 +4,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash, Edit } from 'lucide-react';
+import { Trash, Edit, GripVertical } from 'lucide-react';
 
 const Tasks = () => {
 	const [tasks, setTasks] = useState([]);
@@ -16,7 +16,17 @@ const Tasks = () => {
 
 	const addTask = () => {
 		if (taskText.trim() === '') return;
-		const newTask = { id: Date.now(), text: taskText, category, date: new Date().toLocaleDateString() };
+		const newTask = {
+			id: Date.now(),
+			text: taskText,
+			category,
+			// استفاده از Intl.DateTimeFormat برای دریافت تاریخ شمسی
+			date: new Date().toLocaleDateString('fa-IR-u-ca-persian', {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+			}),
+		};
 		setTasks([...tasks, newTask]);
 		setTaskText('');
 	};
@@ -114,27 +124,34 @@ const SortableTask = ({ task, onDelete, onEdit }) => {
 			ref={setNodeRef}
 			style={style}
 			{...attributes}
-			{...listeners}
-			className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 shadow-md rounded-md mb-2 cursor-grab">
-			{isEditing ? (
-				<input
-					className="border p-1 flex-1 bg-gray-200 dark:bg-gray-800"
-					value={newText}
-					onChange={e => setNewText(e.target.value)}
-					onBlur={() => {
-						onEdit(task.id, newText);
-						setIsEditing(false);
-					}}
-					autoFocus
-				/>
-			) : (
-				<p className="flex-1">
-					{task.text}{' '}
-					<span className="text-gray-500 text-sm">
-						({task.category} - {task.date})
-					</span>
-				</p>
-			)}
+			className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 shadow-md rounded-md mb-2">
+			<div className="flex items-center gap-2">
+				{/* این قسمت به عنوان drag handle */}
+				<div {...listeners} className="cursor-grab">
+					<div {...listeners} className="cursor-grab">
+						<GripVertical size={18} />
+					</div>
+				</div>
+				{isEditing ? (
+					<input
+						className="border p-1 flex-1 bg-gray-200 dark:bg-gray-800"
+						value={newText}
+						onChange={e => setNewText(e.target.value)}
+						onBlur={() => {
+							onEdit(task.id, newText);
+							setIsEditing(false);
+						}}
+						autoFocus
+					/>
+				) : (
+					<p className="flex-1">
+						{task.text}{' '}
+						<span className="text-gray-500 text-sm">
+							({task.category} - {task.date})
+						</span>
+					</p>
+				)}
+			</div>
 			<div className="flex gap-2">
 				<button onClick={() => setIsEditing(true)} className="text-blue-500">
 					<Edit size={18} />
